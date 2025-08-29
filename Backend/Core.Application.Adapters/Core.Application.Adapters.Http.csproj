@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="C:\Users\homep\repos\HybridArchitecture.NET\HybridDDDArchitecture\Core.Application.Adapters.Http\IExternalApiClient.cs" Link="IExternalApiClient.cs" />
-  </ItemGroup>
-
 </Project>
