@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,10 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Legacy\**\*.cs" />
+    <EmbeddedResource Remove="Legacy\**\*" />
+    <None Remove="Legacy\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="DomainServices\" />
     <Folder Include="Aggregators\" />
     <Folder Include="Contracts\" />
     <Folder Include="ValueObjects\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Legacy\README.md" />
   </ItemGroup>
 
   <ItemGroup>

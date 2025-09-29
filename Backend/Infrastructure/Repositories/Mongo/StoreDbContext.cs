@@ -1,6 +1,4 @@
 ﻿using Core.Infraestructure.Repositories.MongoDb;
-using Domain.Entities;
-using Infrastructure.Repositories.Mongo.Maps;
 using MongoDB.Driver;
 
 namespace Infrastructure.Repositories.Mongo
@@ -18,14 +16,15 @@ namespace Infrastructure.Repositories.Mongo
 
         public override IMongoCollection<T> GetCollection<T>()
         {
-            if (typeof(T) == typeof(DummyEntity))
-                return Database.GetCollection<T>(DummyEntityMap.GetCollectionName());
+            // LEGACY CLEANED: DummyEntity mapping removed
+            // Future entity mappings will be added here
             return null;
         }
 
         private static void MapTypes()
         {
-            DummyEntityMap.Configure();
+            // LEGACY CLEANED: DummyEntityMap.Configure();
+            // Future entity mappings will be configured here
         }
     }
 }

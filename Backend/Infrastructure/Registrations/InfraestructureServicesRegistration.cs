@@ -1,9 +1,9 @@
-﻿using Application.Repositories;
-using Core.Application;
+﻿using Core.Application;
 using Core.Infraestructure;
 using Domain.Others.Utils;
 using Infrastructure.Constants;
 using Infrastructure.Factories;
+using Infrastructure.Repositories.Sql.Automoviles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ namespace Infrastructure.Registrations
     /// <summary>
     /// Aqui se deben registrar todas las dependencias de la capa de infraestructura
     /// </summary>
-    public static class InfraestructureServicesRegistration
+    public static partial class InfrastructureServicesRegistration
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
@@ -28,6 +28,16 @@ namespace Infrastructure.Registrations
 
             /* Adapters */
             services.AddSingleton<IExternalApiClient, ExternalApiHttpAdapter>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAutomovilesSqlServer(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<AutomovilesDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("SqlConnectionAutomoviles"));
+            }, ServiceLifetime.Scoped);
 
             return services;
         }

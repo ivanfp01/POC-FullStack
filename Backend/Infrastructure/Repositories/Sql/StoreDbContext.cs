@@ -1,5 +1,4 @@
-﻿using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Sql
 {
@@ -9,8 +8,6 @@ namespace Infrastructure.Repositories.Sql
     /// </summary>
     internal class StoreDbContext : DbContext
     {
-        public DbSet<DummyEntity> DummyEntity { get; set; }
-
         public StoreDbContext(DbContextOptions<StoreDbContext> options) : base(options)
         {
         }
@@ -26,7 +23,7 @@ namespace Infrastructure.Repositories.Sql
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<DummyEntity>().ToTable("DummyEntity");
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

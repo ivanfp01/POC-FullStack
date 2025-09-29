@@ -1,5 +1,4 @@
-﻿using Application.Repositories;
-using Domain.Others.Utils;
+﻿using Domain.Others.Utils;
 using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,9 +38,6 @@ namespace Infrastructure.Factories
             var context = services.BuildServiceProvider().GetRequiredService<Repositories.Sql.StoreDbContext>();
             context.Database.Migrate();
 
-            /* Sql Repositories */
-            services.AddTransient<IDummyEntityRepository, Repositories.Sql.DummyEntityRepository>();
-
             return services;
         }
 
@@ -53,7 +49,7 @@ namespace Infrastructure.Factories
             services.AddSingleton(typeof(Repositories.Mongo.StoreDbContext), db);
 
             /* MongoDb Repositories */
-            services.AddTransient<IDummyEntityRepository, Repositories.Mongo.DummyEntityRepository>();
+            // LEGACY CLEANED: services.AddTransient<IDummyEntityRepository, Repositories.Mongo.DummyEntityRepository>();
 
             return services;
         }

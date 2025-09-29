@@ -1,5 +1,4 @@
-﻿using Application;
-using Application.Registrations;
+﻿using Application.Registrations;
 using AutoMapper;
 using Core.Application;
 using Filters;
@@ -22,6 +21,10 @@ namespace API
             services.AddEndpointsApiExplorer();
             services.AddApplicationServices();
             services.AddInfrastructureServices(Configuration);
+            
+            // Registro del nuevo contexto para Automóviles
+            services.AddAutomovilesSqlServer(Configuration);
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hybrid Architecture Project", Version = "v1" });
@@ -65,9 +68,7 @@ namespace API
         private void UseEventBus(IApplicationBuilder app)
         {
             var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
-            // Aqui se registran las subscripciones a eventos del bus de eventos, vinculando
-            //eventos con sus respectivos handlers
-            eventBus.Subscribe<DummyEntityCreatedIntegrationEvent, DummyEntityCreatedIntegrationEventHandlerSub>();
+            // EventBus subscriptions will be registered here for future non-legacy events
         }
     }
 }

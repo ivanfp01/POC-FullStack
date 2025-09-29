@@ -1,5 +1,4 @@
-﻿using Application.ApplicationServices;
-using Core.Application;
+﻿using Core.Application;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -23,23 +22,18 @@ namespace Application.Registrations
             services.AddMediatR(config => config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddScoped<ICommandQueryBus, MediatrCommandQueryBus>();
 
-            /* Application Services */
-            services.AddScoped<IDummyEntityApplicationService, DummyEntityApplicationService>();
-
             return services;
         }
 
         private static IServiceCollection AddPublishers(this IServiceCollection services)
         {
-            //Aqui se registran los handlers que publican en el bus de eventos
-            services.AddTransient<IIntegrationEventHandler<DummyEntityCreatedIntegrationEvent>, DummyEntityCreatedIntegrationEventHandlerPub>();
+            // Publishers for event bus will be registered here for future non-legacy events
             return services;
         }
 
         private static IServiceCollection AddSubscribers(this IServiceCollection services)
         {
-            //Aqui se registran los handlers que se suscriben al bus de eventos
-            services.AddTransient<DummyEntityCreatedIntegrationEventHandlerSub>();
+            // Subscribers for event bus will be registered here for future non-legacy events
             return services;
         }
     }
