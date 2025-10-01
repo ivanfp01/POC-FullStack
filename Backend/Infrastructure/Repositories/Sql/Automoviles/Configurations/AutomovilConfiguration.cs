@@ -13,20 +13,19 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Configurations
 
             builder.Property(a => a.Marca).IsRequired().HasMaxLength(60);
             builder.Property(a => a.Modelo).IsRequired().HasMaxLength(60);
-            builder.Property(a => a.Tipo).IsRequired().HasMaxLength(40);
             builder.Property(a => a.Anio).IsRequired();
             builder.Property(a => a.Color).HasMaxLength(30);
 
-            // Mapeo del Value Object Vin - configuración más explícita
-            builder.OwnsOne(a => a.NumeroChasis, vin =>
+            // Mapeo del Value Object NumeroChasisVo - configuración más explícita
+            builder.OwnsOne(a => a.NumeroChasis, ch =>
             {
-                vin.Property(v => v.Value)
+                ch.Property(p => p.Value)
                    .HasColumnName("NumeroChasis")
                    .HasMaxLength(17)
                    .IsRequired();
                 
                 // Índice único en la columna
-                vin.HasIndex(v => v.Value)
+                ch.HasIndex(p => p.Value)
                    .HasDatabaseName("IX_Automovil_NumeroChasis")
                    .IsUnique();
             });

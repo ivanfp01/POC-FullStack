@@ -1,5 +1,8 @@
-﻿using Application.Services;
+﻿using Application.Repositories;
+using Application.Services;
+using Application.UseCases.Automovil;
 using Core.Application;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -27,8 +30,14 @@ namespace Application.Registrations
             // LEGACY CLEANED: services.AddScoped<IDummyEntityApplicationService, DummyEntityApplicationService>();
 
             /* Domain Services */
-            services.AddScoped<IVinService, VinService>();
+            services.AddScoped<INumeroChasisService, NumeroChasisService>();
             services.AddScoped<IMotorService, MotorService>();
+
+            /* Use Case Services */
+            services.AddScoped<IAutomovilService, AutomovilService>();
+
+            /* FluentValidation */
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             return services;
         }

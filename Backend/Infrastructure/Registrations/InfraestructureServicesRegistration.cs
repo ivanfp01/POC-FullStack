@@ -1,4 +1,5 @@
-﻿using Core.Application;
+﻿using Application.Repositories;
+using Core.Application;
 using Core.Infraestructure;
 using Domain.Others.Utils;
 using Infrastructure.Constants;
@@ -23,8 +24,11 @@ namespace Infrastructure.Registrations
             /* Database Context */
             services.AddRepositories(configuration);
 
-            /* EventBus */
-            services.AddEventBus(configuration);
+            /* EventBus - Only if enabled */
+            if (configuration.GetValue<bool>("EventBus:Enabled", false))
+            {
+                services.AddEventBus(configuration);
+            }
 
             /* Adapters */
             services.AddSingleton<IExternalApiClient, ExternalApiHttpAdapter>();
@@ -38,6 +42,9 @@ namespace Infrastructure.Registrations
             {
                 options.UseSqlServer(configuration.GetConnectionString("SqlConnectionAutomoviles"));
             }, ServiceLifetime.Scoped);
+
+            /* Automoviles Repositories */
+            services.AddScoped<IAutomovilRepository, AutomovilRepository>();
 
             return services;
         }

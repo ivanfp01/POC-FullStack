@@ -16,6 +16,7 @@
     <Folder Include="DomainServices\" />
     <Folder Include="Aggregators\" />
     <Folder Include="Contracts\" />
+    <Folder Include="Tests\" />
   </ItemGroup>
 
   <ItemGroup>

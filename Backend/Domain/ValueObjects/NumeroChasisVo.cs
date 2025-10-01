@@ -2,31 +2,31 @@ using System.Text.RegularExpressions;
 
 namespace Domain.ValueObjects
 {
-    public record Vin
+    public record NumeroChasisVo
     {
         private static readonly Regex VinRegex = new(@"^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.Compiled);
 
         public string Value { get; }
 
-        private Vin(string value)
+        private NumeroChasisVo(string value)
         {
             Value = value;
         }
 
-        public static Vin Create(string vin)
+        public static NumeroChasisVo Create(string numeroChasis)
         {
-            if (string.IsNullOrWhiteSpace(vin))
-                throw new ArgumentException("VIN requerido");
+            if (string.IsNullOrWhiteSpace(numeroChasis))
+                throw new ArgumentException("Número de chasis (VIN) requerido");
 
-            vin = vin.Trim().ToUpperInvariant();
+            numeroChasis = numeroChasis.Trim().ToUpperInvariant();
 
-            if (!VinRegex.IsMatch(vin))
-                throw new ArgumentException("VIN inválido. Debe tener 17 caracteres y no contener I/O/Q.");
+            if (!VinRegex.IsMatch(numeroChasis))
+                throw new ArgumentException("Número de chasis (VIN) inválido. Debe tener 17 caracteres y no contener I/O/Q.");
 
-            if (!CheckDigitIsValid(vin))
-                throw new ArgumentException("Dígito verificador inválido.");
+            if (!CheckDigitIsValid(numeroChasis))
+                throw new ArgumentException("Número de chasis (VIN) con dígito verificador inválido.");
 
-            return new Vin(vin);
+            return new NumeroChasisVo(numeroChasis);
         }
 
         private static bool CheckDigitIsValid(string vin)

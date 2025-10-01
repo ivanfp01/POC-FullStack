@@ -2,7 +2,7 @@ using Domain.ValueObjects;
 
 namespace Application.Services
 {
-    public class VinService : IVinService
+    public class NumeroChasisService : INumeroChasisService
     {
         private static readonly Dictionary<string, string> MarcaToWMI = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -15,18 +15,18 @@ namespace Application.Services
 
         private static int _sequenceCounter = 100000;
 
-        public Vin Validate(string vin)
+        public NumeroChasisVo Validate(string numero)
         {
-            return Vin.Create(vin);
+            return NumeroChasisVo.Create(numero);
         }
 
-        public Vin Generate(string marca, int anio, string tipo)
+        public NumeroChasisVo Generate(string marca, int anio)
         {
             // WMI (World Manufacturer Identifier) - 3 caracteres
             string wmi = MarcaToWMI.GetValueOrDefault(marca.ToUpper(), MarcaToWMI["DEFAULT"]);
 
-            // VDS (Vehicle Descriptor Section) - 5 caracteres
-            string vds = GenerateVDS(tipo, marca);
+            // VDS (Vehicle Descriptor Section) - 5 caracteres genéricos
+            string vds = "ABC12";
 
             // Incrementar contador de secuencia
             var sequence = Interlocked.Increment(ref _sequenceCounter);
@@ -47,20 +47,7 @@ namespace Application.Services
             // VIN final con dígito verificador en posición 8
             string vinFinal = vinSinCheck.Substring(0, 8) + checkDigit + vinSinCheck.Substring(9);
 
-            return Vin.Create(vinFinal);
-        }
-
-        private static string GenerateVDS(string tipo, string marca)
-        {
-            // Generar VDS basado en tipo de vehículo
-            return tipo.ToUpper() switch
-            {
-                "SEDAN" => "A1B2C",
-                "SUV" => "D3E4F",
-                "PICKUP" => "G5H6J",
-                "HATCHBACK" => "K7L8M",
-                _ => "N9P0Q"
-            };
+            return NumeroChasisVo.Create(vinFinal);
         }
 
         private static char GetAnioCodigo(int anio)

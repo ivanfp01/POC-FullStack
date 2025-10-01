@@ -2,7 +2,9 @@
 using AutoMapper;
 using Core.Application;
 using Filters;
+using FluentValidation;
 using Infrastructure.Registrations;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -27,12 +29,38 @@ namespace API
             
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hybrid Architecture Project", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Automóviles API", Version = "v1" });
+                
+                // Include XML comments
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
             });
+
+            // Configurar validación automática de modelos
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var problemDetails = new ValidationProblemDetails(context.ModelState)
+                    {
+                        Title = "Error de validación",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = "Uno o más errores de validación ocurrieron."
+                    };
+
+                    return new BadRequestObjectResult(problemDetails);
+                };
+            });
+
             services.AddMvc().AddMvcOptions(options =>
             {
                 options.Filters.Add<BaseExceptionFilter>();
             });
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin", builder => builder
@@ -51,17 +79,31 @@ namespace API
                 app.UseDeveloperExceptionPage();
 
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Automóviles API v1");
+                    c.RoutePrefix = string.Empty; // Para que Swagger esté en la raíz
+                });
             }
 
-            CustomMapper.Instance = app.ApplicationServices.GetRequiredService<IMapper>();
+            // Initialize CustomMapper only if EventBus is enabled
+            if (Configuration.GetValue<bool>("EventBus:Enabled", false))
+            {
+                CustomMapper.Instance = app.ApplicationServices.GetRequiredService<IMapper>();
+            }
 
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("AllowSpecificOrigin");
             app.UseAuthentication();
             app.UseAuthorization();
-            UseEventBus(app);
+            
+            // Initialize EventBus only if enabled
+            if (Configuration.GetValue<bool>("EventBus:Enabled", false))
+            {
+                UseEventBus(app);
+            }
+            
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 

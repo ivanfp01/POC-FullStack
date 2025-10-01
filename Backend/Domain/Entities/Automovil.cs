@@ -11,12 +11,11 @@ namespace Domain.Entities
 
         public string Marca { get; set; } = string.Empty;
         public string Modelo { get; set; } = string.Empty;
-        public string Tipo { get; set; } = string.Empty;  // ej: Sedan, Pickup, SUV
         public int Anio { get; set; }
         public string Color { get; set; } = string.Empty;
 
-        // Value Object para VIN (NumeroChasis)
-        public Vin NumeroChasis { get; set; }
+        // Value Object para número de chasis (VIN)
+        public NumeroChasisVo NumeroChasis { get; set; }
 
         // Serial de motor (string simple, validado en servicio)
         public string NumeroMotor { get; set; } = string.Empty;
