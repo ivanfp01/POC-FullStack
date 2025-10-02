@@ -8,7 +8,21 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Configurations
     {
         public void Configure(EntityTypeBuilder<Automovil> builder)
         {
-            builder.ToTable("Automovil");
+            builder.ToTable("Automovil", t =>
+            {
+                t.HasCheckConstraint("CK_Automovil_Año_Rango",
+                    $"[Año] >= 1900 AND [Año] <= (YEAR(GETDATE()) + 1)");
+
+                t.HasCheckConstraint("CK_Automovil_Marca_NotBlank",
+                    "LEN(LTRIM(RTRIM([Marca]))) > 0");
+
+                t.HasCheckConstraint("CK_Automovil_Modelo_NotBlank",
+                    "LEN(LTRIM(RTRIM([Modelo]))) > 0");
+
+                t.HasCheckConstraint("CK_Automovil_Color_NotBlank",
+                    "LEN(LTRIM(RTRIM([Color]))) > 0");
+            });
+            
             builder.HasKey(a => a.Id);
 
             builder.Property(a => a.Marca).IsRequired().HasMaxLength(60);
@@ -16,9 +30,10 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Configurations
             builder.Property(a => a.Año)
                    .HasColumnName("Año")
                    .IsRequired();
-            builder.Property(a => a.Color).HasMaxLength(30);
+            builder.Property(a => a.Color)
+                   .HasMaxLength(30)
+                   .IsRequired();
 
-            // Mapeo del Value Object NumeroChasisVo - configuración más explícita
             builder.OwnsOne(a => a.NumeroChasis, ch =>
             {
                 ch.Property(p => p.Value)
@@ -26,19 +41,16 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Configurations
                    .HasMaxLength(17)
                    .IsRequired();
                 
-                // Índice único en la columna
                 ch.HasIndex(p => p.Value)
                    .HasDatabaseName("IX_Automovil_NumeroChasis")
                    .IsUnique();
             });
 
-            // Configurar que el owned type es requerido
             builder.Navigation(a => a.NumeroChasis).IsRequired();
 
             builder.Property(a => a.NumeroMotor).IsRequired().HasMaxLength(20);
             builder.Property(a => a.FechaAlta).IsRequired();
 
-            // Índice único para NumeroMotor
             builder.HasIndex(a => a.NumeroMotor)
                    .HasDatabaseName("IX_Automovil_NumeroMotor")
                    .IsUnique();

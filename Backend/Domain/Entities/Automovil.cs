@@ -12,7 +12,7 @@ namespace Domain.Entities
         public string Marca { get; set; } = string.Empty;
         public string Modelo { get; set; } = string.Empty;
         public int Año { get; set; }
-        public string? Color { get; set; }
+        public string Color { get; set; } = string.Empty; // Ya no nullable
 
         // Value Object para número de chasis (VIN)
         public NumeroChasisVo NumeroChasis { get; set; } = default!;

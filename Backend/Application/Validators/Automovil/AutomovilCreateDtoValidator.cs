@@ -1,4 +1,5 @@
 using Application.DTOs.Automovil;
+using Application.Json.Converters;
 using Application.Services;
 using FluentValidation;
 
@@ -6,54 +7,62 @@ namespace Application.Validators.Automovil
 {
     public class AutomovilCreateDtoValidator : AbstractValidator<AutomovilCreateDto>
     {
-        private readonly INumeroChasisService _numeroChasisService;
+        private readonly INumeroChasisService _chasisService;
         private readonly IMotorService _motorService;
 
-        public AutomovilCreateDtoValidator(INumeroChasisService numeroChasisService, IMotorService motorService)
+        public AutomovilCreateDtoValidator(INumeroChasisService chasisService, IMotorService motorService)
         {
-            _numeroChasisService = numeroChasisService;
+            _chasisService = chasisService;
             _motorService = motorService;
 
             RuleFor(x => x.Marca)
-                .NotEmpty().WithMessage("Marca es requerida")
-                .MaximumLength(60).WithMessage("Marca no puede exceder 60 caracteres")
-                .Must(v => !IsPlaceholder(v)).WithMessage("Marca es inválida");
+                .Cascade(CascadeMode.Stop)
+                .NotNull().WithMessage("Marca es requerida")
+                .NotEmpty().WithMessage("Marca no puede estar vacía")
+                .Must(x => !string.IsNullOrWhiteSpace(x) && !StringSanitizer.IsPlaceholder(x)).WithMessage("Marca no puede ser un placeholder")
+                .MaximumLength(60).WithMessage("Marca no puede exceder 60 caracteres");
 
             RuleFor(x => x.Modelo)
-                .NotEmpty().WithMessage("Modelo es requerido")
-                .MaximumLength(60).WithMessage("Modelo no puede exceder 60 caracteres")
-                .Must(v => !IsPlaceholder(v)).WithMessage("Modelo es inválido");
+                .Cascade(CascadeMode.Stop)
+                .NotNull().WithMessage("Modelo es requerido")
+                .NotEmpty().WithMessage("Modelo no puede estar vacío")
+                .Must(x => !string.IsNullOrWhiteSpace(x) && !StringSanitizer.IsPlaceholder(x)).WithMessage("Modelo no puede ser un placeholder")
+                .MaximumLength(60).WithMessage("Modelo no puede exceder 60 caracteres");
 
             RuleFor(x => x.Año)
-                .GreaterThanOrEqualTo(1900).WithMessage("Año debe ser mayor o igual a 1900")
-                .LessThanOrEqualTo(DateTime.Now.Year + 1).WithMessage($"Año no puede ser mayor a {DateTime.Now.Year + 1}");
+                .Cascade(CascadeMode.Stop)
+                .InclusiveBetween(1900, DateTime.Now.Year + 1).WithMessage($"Año debe estar entre 1900 y {DateTime.Now.Year + 1}");
 
             RuleFor(x => x.Color)
-                .NotEmpty().WithMessage("Color es requerido")
-                .MaximumLength(30).WithMessage("Color no puede exceder 30 caracteres")
-                .Must(v => !IsPlaceholder(v)).WithMessage("Color es inválido");
+                .Cascade(CascadeMode.Stop)
+                .NotNull().WithMessage("Color es requerido")
+                .NotEmpty().WithMessage("Color no puede estar vacío")
+                .Must(x => !string.IsNullOrWhiteSpace(x) && !StringSanitizer.IsPlaceholder(x)).WithMessage("Color no puede ser un placeholder")
+                .MaximumLength(30).WithMessage("Color no puede exceder 30 caracteres");
 
             RuleFor(x => x.NumeroChasis)
-                .Must(BeValidChasis).WithMessage("Número de chasis (VIN) inválido")
-                .When(x => !string.IsNullOrWhiteSpace(x.NumeroChasis) && !IsPlaceholder(x.NumeroChasis));
+                .Must(BeValidOptionalChasis).WithMessage("Número de chasis (VIN) inválido");
 
             RuleFor(x => x.NumeroMotor)
-                .Must(BeValidMotor).WithMessage("Número de motor inválido")
-                .When(x => !string.IsNullOrWhiteSpace(x.NumeroMotor) && !IsPlaceholder(x.NumeroMotor));
+                .Must(BeValidOptionalMotor).WithMessage("Número de motor inválido");
         }
 
-        private bool BeValidChasis(string vin)
+        private bool BeValidOptionalChasis(string? vin)
         {
-            try { _numeroChasisService.Validate(vin); return true; } catch { return false; }
+            var normalized = StringSanitizer.NormalizeOrNull(vin);
+            if (normalized == null) return true;
+            
+            try { _chasisService.Validate(normalized); return true; }
+            catch { return false; }
         }
 
-        private bool BeValidMotor(string n)
+        private bool BeValidOptionalMotor(string? numeroMotor)
         {
-            try { _motorService.Validate(n); return true; } catch { return false; }
+            var normalized = StringSanitizer.NormalizeOrNull(numeroMotor);
+            if (normalized == null) return true;
+            
+            try { _motorService.Validate(normalized); return true; }
+            catch { return false; }
         }
-
-        // Helper
-        private static bool IsPlaceholder(string? s) =>
-            string.Equals(s?.Trim(), "string", StringComparison.OrdinalIgnoreCase);
     }
 }

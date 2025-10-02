@@ -23,15 +23,12 @@ namespace API
             services.AddEndpointsApiExplorer();
             services.AddApplicationServices();
             services.AddInfrastructureServices(Configuration);
-            
-            // Registro del nuevo contexto para Automóviles
             services.AddAutomovilesSqlServer(Configuration);
             
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Automóviles API", Version = "v1" });
                 
-                // Include XML comments
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 if (File.Exists(xmlPath))
@@ -40,7 +37,8 @@ namespace API
                 }
             });
 
-            // Configurar validación automática de modelos
+            services.AddHealthChecks();
+
             services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
@@ -73,7 +71,6 @@ namespace API
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -82,11 +79,10 @@ namespace API
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Automóviles API v1");
-                    c.RoutePrefix = string.Empty; // Para que Swagger esté en la raíz
+                    c.RoutePrefix = string.Empty;
                 });
             }
 
-            // Initialize CustomMapper only if EventBus is enabled
             if (Configuration.GetValue<bool>("EventBus:Enabled", false))
             {
                 CustomMapper.Instance = app.ApplicationServices.GetRequiredService<IMapper>();
@@ -102,19 +98,21 @@ namespace API
             app.UseAuthentication();
             app.UseAuthorization();
             
-            // Initialize EventBus only if enabled
             if (Configuration.GetValue<bool>("EventBus:Enabled", false))
             {
                 UseEventBus(app);
             }
             
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints => 
+            { 
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+            });
         }
 
         private void UseEventBus(IApplicationBuilder app)
         {
             var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
-            // EventBus subscriptions will be registered here for future non-legacy events
         }
     }
 }

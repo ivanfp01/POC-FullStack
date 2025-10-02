@@ -3,10 +3,6 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Repositories.Mongo
 {
-    /// <summary>
-    /// Contexto de almacenamiento en base de datos. Aca se definen los nombres de 
-    /// las colecciones, y los mapeos entre los objetos
-    /// </summary>
     internal class StoreDbContext : DbContext
     {
         public StoreDbContext(string connectionString) : base(connectionString)
@@ -16,15 +12,11 @@ namespace Infrastructure.Repositories.Mongo
 
         public override IMongoCollection<T> GetCollection<T>()
         {
-            // LEGACY CLEANED: DummyEntity mapping removed
-            // Future entity mappings will be added here
             return null;
         }
 
         private static void MapTypes()
         {
-            // LEGACY CLEANED: DummyEntityMap.Configure();
-            // Future entity mappings will be configured here
         }
     }
 }

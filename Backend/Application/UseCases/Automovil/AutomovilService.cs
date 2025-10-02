@@ -1,6 +1,7 @@
 using Application.DTOs.Automovil;
 using Application.Repositories;
 using Application.Services;
+using Application.Json.Converters;
 using Domain.ValueObjects;
 
 namespace Application.UseCases.Automovil
@@ -20,58 +21,42 @@ namespace Application.UseCases.Automovil
 
         public async Task<int> CreateAsync(AutomovilCreateDto dto)
         {
-            // Normalizar strings
-            var marca = dto.Marca.Trim().ToUpperInvariant();
-            var modelo = dto.Modelo.Trim().ToUpperInvariant();
-            var color = dto.Color?.Trim();
+            var marca = StringSanitizer.NormalizeRequired(dto.Marca).ToUpperInvariant();
+            var modelo = StringSanitizer.NormalizeRequired(dto.Modelo).ToUpperInvariant();
+            var color = StringSanitizer.NormalizeRequired(dto.Color);
+            var anio = dto.Año;
+            
+            if (anio < 1900 || anio > DateTime.Now.Year + 1)
+                throw new ArgumentException($"Año inválido. Debe estar entre 1900 y {DateTime.Now.Year + 1}.");
 
-            // Tratar placeholders como vacío
-            bool IsPlaceholder(string? s) => string.Equals(s?.Trim(), "string", StringComparison.OrdinalIgnoreCase);
+            var chasisInput = StringSanitizer.NormalizeOrNull(dto.NumeroChasis);
+            var motorInput = StringSanitizer.NormalizeOrNull(dto.NumeroMotor);
 
-            var chasisInput = IsPlaceholder(dto.NumeroChasis) ? null : dto.NumeroChasis;
-            var motorInput = IsPlaceholder(dto.NumeroMotor) ? null : dto.NumeroMotor;
+            var numeroChasis = chasisInput == null
+                ? _numeroChasisService.Generate(marca, anio)
+                : _numeroChasisService.Validate(chasisInput);
 
-            // Generar o validar NumeroChasis
-            NumeroChasisVo numeroChasis;
-            if (string.IsNullOrWhiteSpace(chasisInput))
+            if (chasisInput != null)
             {
-                numeroChasis = _numeroChasisService.Generate(marca, dto.Año);
-            }
-            else
-            {
-                numeroChasis = _numeroChasisService.Validate(chasisInput);
-                
-                // Verificar unicidad del número de chasis (VIN)
-                var existeChasis = await _repository.ExistsByVinAsync(numeroChasis.Value);
-                if (existeChasis)
-                {
-                    throw new InvalidOperationException($"Ya existe un automóvil con el número de chasis {numeroChasis.Value}");
-                }
+                var existe = await _repository.ExistsByVinAsync(numeroChasis.Value);
+                if (existe) throw new InvalidOperationException($"Ya existe un automóvil con el número de chasis {numeroChasis.Value}");
             }
 
-            // Generar o validar NumeroMotor
-            string numeroMotor;
-            if (string.IsNullOrWhiteSpace(motorInput))
+            var numeroMotor = motorInput == null
+                ? _motorService.Generate(marca, anio)
+                : _motorService.Validate(motorInput);
+
+            if (motorInput != null)
             {
-                numeroMotor = _motorService.Generate(marca, dto.Año);
-            }
-            else
-            {
-                numeroMotor = _motorService.Validate(motorInput);
-                
-                // Verificar unicidad del motor
-                var existeMotor = await _repository.ExistsByMotorNumberAsync(numeroMotor);
-                if (existeMotor)
-                {
-                    throw new InvalidOperationException($"Ya existe un automóvil con el número de motor {numeroMotor}");
-                }
+                var existe = await _repository.ExistsByMotorNumberAsync(numeroMotor);
+                if (existe) throw new InvalidOperationException($"Ya existe un automóvil con el número de motor {numeroMotor}");
             }
 
             var automovil = new Domain.Entities.Automovil
             {
                 Marca = marca,
                 Modelo = modelo,
-                Año = dto.Año,
+                Año = anio,
                 Color = color,
                 NumeroChasis = numeroChasis,
                 NumeroMotor = numeroMotor,
@@ -89,22 +74,22 @@ namespace Application.UseCases.Automovil
                 throw new KeyNotFoundException($"Automóvil con ID {id} no encontrado");
             }
 
-            // Solo actualizar Color y NumeroMotor (campos permitidos)
             if (dto.Color != null)
-                automovil.Color = dto.Color.Trim();
+            {
+                var color = StringSanitizer.NormalizeOrNull(dto.Color);
+                if (color == null) throw new ArgumentException("Color no puede estar vacío");
+                automovil.Color = color;
+            }
 
-            // Actualizar NumeroMotor si se proporciona
             if (!string.IsNullOrEmpty(dto.NumeroMotor))
             {
-                var nuevoMotor = _motorService.Validate(dto.NumeroMotor);
-                
-                // Verificar unicidad (excluyendo el automóvil actual)
+                var motorInput = StringSanitizer.NormalizeOrNull(dto.NumeroMotor);
+                if (motorInput == null) throw new ArgumentException("Número de motor no puede estar vacío");
+                var nuevoMotor = _motorService.Validate(motorInput);
+
                 var existeMotor = await _repository.ExistsByMotorNumberAsync(nuevoMotor, id);
-                if (existeMotor)
-                {
-                    throw new InvalidOperationException($"Ya existe un automóvil con el número de motor {nuevoMotor}");
-                }
-                
+                if (existeMotor) throw new InvalidOperationException($"Ya existe un automóvil con el número de motor {nuevoMotor}");
+
                 automovil.NumeroMotor = nuevoMotor;
             }
 
@@ -133,9 +118,7 @@ namespace Application.UseCases.Automovil
 
         public async Task<AutomovilReadDto?> GetByChasisAsync(string numeroChasis)
         {
-            // Normalizar y validar el número de chasis (VIN)
             var chasis = _numeroChasisService.Validate(numeroChasis);
-            
             var automovil = await _repository.GetByVinAsync(chasis.Value);
             
             if (automovil == null)

@@ -1,4 +1,5 @@
 using Application.DTOs.Automovil;
+using Application.Json.Converters;
 using Application.Services;
 using FluentValidation;
 
@@ -13,17 +14,31 @@ namespace Application.Validators.Automovil
             _motorService = motorService;
 
             RuleFor(x => x.Color)
-                .MaximumLength(30).WithMessage("Color no puede exceder 30 caracteres")
-                .When(x => x.Color != null);
+                .Must(BeValidOptionalColor).WithMessage("Color no puede estar vacío (usar null para no cambiar) o exceder 30 caracteres");
 
             RuleFor(x => x.NumeroMotor)
-                .Must(BeValidMotor).WithMessage("Número de motor inválido")
-                .When(x => !string.IsNullOrEmpty(x.NumeroMotor));
+                .Must(BeValidOptionalMotor).WithMessage("Número de motor inválido");
         }
 
-        private bool BeValidMotor(string n)
+        private bool BeValidOptionalColor(string? color)
         {
-            try { _motorService.Validate(n); return true; } catch { return false; }
+            if (color == null) return true;
+            
+            var normalized = StringSanitizer.NormalizeOrNull(color);
+            if (normalized == null) return false;
+            
+            return normalized.Length <= 30;
+        }
+
+        private bool BeValidOptionalMotor(string? numeroMotor)
+        {
+            if (numeroMotor == null) return true;
+            
+            var normalized = StringSanitizer.NormalizeOrNull(numeroMotor);
+            if (normalized == null) return false;
+            
+            try { _motorService.Validate(normalized); return true; }
+            catch { return false; }
         }
     }
 }

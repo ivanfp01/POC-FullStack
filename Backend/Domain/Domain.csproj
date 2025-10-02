@@ -16,11 +16,8 @@
     <Folder Include="DomainServices\" />
     <Folder Include="Aggregators\" />
     <Folder Include="Contracts\" />
+    <Folder Include="Legacy\" />
     <Folder Include="Tests\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Legacy\README.md" />
   </ItemGroup>
 
   <ItemGroup>

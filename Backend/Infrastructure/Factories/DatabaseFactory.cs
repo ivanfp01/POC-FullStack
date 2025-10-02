@@ -48,9 +48,6 @@ namespace Infrastructure.Factories
             Repositories.Mongo.StoreDbContext db = new(configuration.GetConnectionString("MongoConnection") ?? throw new NullReferenceException());
             services.AddSingleton(typeof(Repositories.Mongo.StoreDbContext), db);
 
-            /* MongoDb Repositories */
-            // LEGACY CLEANED: services.AddTransient<IDummyEntityRepository, Repositories.Mongo.DummyEntityRepository>();
-
             return services;
         }
     }

@@ -4,6 +4,7 @@ using Infrastructure.Repositories.Sql.Automoviles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Repositories.Sql.Automoviles.Migrations
 {
     [DbContext(typeof(AutomovilesDbContext))]
-    partial class AutomovilesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251002192313_Make_Color_NotNull")]
+    partial class Make_Color_NotNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,16 +66,7 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Automovil_NumeroMotor");
 
-                    b.ToTable("Automovil", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Automovil_Año_Rango", "[Año] >= 1900 AND [Año] <= (YEAR(GETDATE()) + 1)");
-
-                            t.HasCheckConstraint("CK_Automovil_Color_NotBlank", "LEN(LTRIM(RTRIM([Color]))) > 0");
-
-                            t.HasCheckConstraint("CK_Automovil_Marca_NotBlank", "LEN(LTRIM(RTRIM([Marca]))) > 0");
-
-                            t.HasCheckConstraint("CK_Automovil_Modelo_NotBlank", "LEN(LTRIM(RTRIM([Modelo]))) > 0");
-                        });
+                    b.ToTable("Automovil", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Automovil", b =>

@@ -14,23 +14,17 @@ using static Domain.Enums.Enums;
 
 namespace Infrastructure.Registrations
 {
-    /// <summary>
-    /// Aqui se deben registrar todas las dependencias de la capa de infraestructura
-    /// </summary>
     public static partial class InfrastructureServicesRegistration
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            /* Database Context */
             services.AddRepositories(configuration);
 
-            /* EventBus - Only if enabled */
             if (configuration.GetValue<bool>("EventBus:Enabled", false))
             {
                 services.AddEventBus(configuration);
             }
 
-            /* Adapters */
             services.AddSingleton<IExternalApiClient, ExternalApiHttpAdapter>();
 
             return services;
@@ -43,7 +37,6 @@ namespace Infrastructure.Registrations
                 options.UseSqlServer(configuration.GetConnectionString("SqlConnectionAutomoviles"));
             }, ServiceLifetime.Scoped);
 
-            /* Automoviles Repositories */
             services.AddScoped<IAutomovilRepository, AutomovilRepository>();
 
             return services;
