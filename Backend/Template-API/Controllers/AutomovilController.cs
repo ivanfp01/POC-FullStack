@@ -29,7 +29,7 @@ namespace Template_API.Controllers
         /// {
         ///   "marca": "AUDI",
         ///   "modelo": "A4", 
-        ///   "anio": 2025,
+        ///   "año": 2025,
         ///   "color": "BLANCO"
         /// }
         /// </example>
@@ -71,7 +71,7 @@ namespace Template_API.Controllers
         /// <param name="dto">Datos a actualizar. El número de chasis (VIN) NO se puede modificar.</param>
         /// <example>
         /// Ejemplo de actualización:
-        /// { "color": "ROJO" }
+        /// { "color": "ROJO", "año": 2026 }
         /// </example>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

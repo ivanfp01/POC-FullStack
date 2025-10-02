@@ -13,7 +13,9 @@ namespace Infrastructure.Repositories.Sql.Automoviles.Configurations
 
             builder.Property(a => a.Marca).IsRequired().HasMaxLength(60);
             builder.Property(a => a.Modelo).IsRequired().HasMaxLength(60);
-            builder.Property(a => a.Anio).IsRequired();
+            builder.Property(a => a.Año)
+                   .HasColumnName("Año")
+                   .IsRequired();
             builder.Property(a => a.Color).HasMaxLength(30);
 
             // Mapeo del Value Object NumeroChasisVo - configuración más explícita

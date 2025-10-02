@@ -92,7 +92,11 @@ namespace API
                 CustomMapper.Instance = app.ApplicationServices.GetRequiredService<IMapper>();
             }
 
-            app.UseHttpsRedirection();
+            if (!env.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+            
             app.UseRouting();
             app.UseCors("AllowSpecificOrigin");
             app.UseAuthentication();

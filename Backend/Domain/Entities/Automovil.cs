@@ -11,15 +11,15 @@ namespace Domain.Entities
 
         public string Marca { get; set; } = string.Empty;
         public string Modelo { get; set; } = string.Empty;
-        public int Anio { get; set; }
-        public string Color { get; set; } = string.Empty;
+        public int Año { get; set; }
+        public string? Color { get; set; }
 
         // Value Object para número de chasis (VIN)
-        public NumeroChasisVo NumeroChasis { get; set; }
+        public NumeroChasisVo NumeroChasis { get; set; } = default!;
 
         // Serial de motor (string simple, validado en servicio)
         public string NumeroMotor { get; set; } = string.Empty;
 
-        public DateTime FechaAlta { get; set; } = DateTime.UtcNow;
+        public DateTime FechaAlta { get; set; } = DateTime.Now;
     }
 }

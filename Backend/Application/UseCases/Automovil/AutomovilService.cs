@@ -25,15 +25,21 @@ namespace Application.UseCases.Automovil
             var modelo = dto.Modelo.Trim().ToUpperInvariant();
             var color = dto.Color?.Trim();
 
+            // Tratar placeholders como vacío
+            bool IsPlaceholder(string? s) => string.Equals(s?.Trim(), "string", StringComparison.OrdinalIgnoreCase);
+
+            var chasisInput = IsPlaceholder(dto.NumeroChasis) ? null : dto.NumeroChasis;
+            var motorInput = IsPlaceholder(dto.NumeroMotor) ? null : dto.NumeroMotor;
+
             // Generar o validar NumeroChasis
             NumeroChasisVo numeroChasis;
-            if (string.IsNullOrEmpty(dto.NumeroChasis))
+            if (string.IsNullOrWhiteSpace(chasisInput))
             {
-                numeroChasis = _numeroChasisService.Generate(marca, dto.Anio);
+                numeroChasis = _numeroChasisService.Generate(marca, dto.Año);
             }
             else
             {
-                numeroChasis = _numeroChasisService.Validate(dto.NumeroChasis);
+                numeroChasis = _numeroChasisService.Validate(chasisInput);
                 
                 // Verificar unicidad del número de chasis (VIN)
                 var existeChasis = await _repository.ExistsByVinAsync(numeroChasis.Value);
@@ -45,13 +51,13 @@ namespace Application.UseCases.Automovil
 
             // Generar o validar NumeroMotor
             string numeroMotor;
-            if (string.IsNullOrEmpty(dto.NumeroMotor))
+            if (string.IsNullOrWhiteSpace(motorInput))
             {
-                numeroMotor = _motorService.Generate(marca, dto.Anio);
+                numeroMotor = _motorService.Generate(marca, dto.Año);
             }
             else
             {
-                numeroMotor = _motorService.Validate(dto.NumeroMotor);
+                numeroMotor = _motorService.Validate(motorInput);
                 
                 // Verificar unicidad del motor
                 var existeMotor = await _repository.ExistsByMotorNumberAsync(numeroMotor);
@@ -65,11 +71,11 @@ namespace Application.UseCases.Automovil
             {
                 Marca = marca,
                 Modelo = modelo,
-                Anio = dto.Anio,
+                Año = dto.Año,
                 Color = color,
                 NumeroChasis = numeroChasis,
                 NumeroMotor = numeroMotor,
-                FechaAlta = DateTime.UtcNow
+                FechaAlta = DateTime.Now
             };
 
             return await _repository.AddAsync(automovil);
@@ -83,20 +89,9 @@ namespace Application.UseCases.Automovil
                 throw new KeyNotFoundException($"Automóvil con ID {id} no encontrado");
             }
 
-            // Aplicar cambios solo si los valores no son null
-            if (dto.Marca != null)
-                automovil.Marca = dto.Marca.Trim().ToUpperInvariant();
-            
-            if (dto.Modelo != null)
-                automovil.Modelo = dto.Modelo.Trim().ToUpperInvariant();
-           
-            if (dto.Anio.HasValue)
-                automovil.Anio = dto.Anio.Value;
-            
+            // Solo actualizar Color y NumeroMotor (campos permitidos)
             if (dto.Color != null)
                 automovil.Color = dto.Color.Trim();
-
-            // NumeroChasis (VIN) NO se puede actualizar - eliminado completamente
 
             // Actualizar NumeroMotor si se proporciona
             if (!string.IsNullOrEmpty(dto.NumeroMotor))
@@ -162,7 +157,7 @@ namespace Application.UseCases.Automovil
                 Id = automovil.Id,
                 Marca = automovil.Marca,
                 Modelo = automovil.Modelo,
-                Anio = automovil.Anio,
+                Año = automovil.Año,
                 Color = automovil.Color,
                 NumeroChasis = automovil.NumeroChasis.Value,
                 NumeroMotor = automovil.NumeroMotor,

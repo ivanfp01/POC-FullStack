@@ -4,6 +4,7 @@ using Infrastructure.Repositories.Sql.Automoviles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Repositories.Sql.Automoviles.Migrations
 {
     [DbContext(typeof(AutomovilesDbContext))]
-    partial class AutomovilesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251002174520_Rename_Anio_Column_to_Año")]
+    partial class Rename_Anio_Column_to_Año
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
